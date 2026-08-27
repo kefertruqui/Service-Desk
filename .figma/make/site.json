@@ -1,0 +1,10 @@
+{
+  "description": "Provides a user-friendly interface with the University of the Amazon's official blue color scheme, enhancing usability and aligning with institutional branding.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

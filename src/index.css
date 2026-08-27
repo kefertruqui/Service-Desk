@@ -1,0 +1,232 @@
+@import 'tailwindcss';
+
+/*
+  Sistema de diseño Mesa de Servicios OATI
+  -----------------------------------------
+  Tokens semánticos con dos temas:
+    - Día (default): neutros casi blancos, acento azul institucional #005A7E.
+    - Noche: azules profundos casi negros, mismo acento institucional.
+  El tema se activa con [data-theme="dark"] en <html> (ver src/hooks/useTheme.ts).
+*/
+
+:root {
+  color-scheme: light;
+
+  /* Superficies y líneas */
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --raised: #fbfbfd;
+  --hover: #ececf0;
+  --line: #d2d2d7;
+  --line-soft: #e8e8ed;
+  --line-strong: #bdbdc2;
+
+  /* Texto */
+  --ink: #1d1d1f;
+  --body-c: #424245;
+  --muted: #6e6e73;
+  --faint: #a1a1a6;
+
+  /* Acento institucional */
+  --accent: #005A7E;
+  --accent-strong: #004a68;
+  --accent-mid: #00709e;
+  --accent-soft: #e1edf4;
+  --on-accent: #ffffff;
+  --accent-ring: rgba(0, 90, 126, 0.25);
+  --accent-ring-strong: rgba(0, 90, 126, 0.4);
+
+  /* Semánticos (texto / fondo suave) */
+  --info: #005A7E;         --info-bg: rgba(0, 90, 126, 0.09);
+  --teal: #0c6e60;         --teal-bg: rgba(22, 149, 134, 0.11);
+  --ok: #22701d;           --ok-bg: rgba(52, 171, 30, 0.10);   --ok-line: #a9dc9c;
+  --warn: #b35309;         --warn-bg: rgba(228, 113, 19, 0.11); --warn-line: #f5c79a;
+  --gold: #8a5c08;         --gold-bg: rgba(237, 176, 46, 0.13); --gold-line: #eed49a;
+  --danger: #b01620;       --danger-bg: rgba(166, 20, 29, 0.07); --danger-line: #f3b3b7;
+  --violet: #4740cd;       --violet-bg: rgba(99, 102, 241, 0.10);
+  --sky: #0284C7;          --sky-bg: rgba(2, 132, 199, 0.10);
+  --rose: #BE123C;         --rose-bg: rgba(190, 18, 60, 0.08);
+  --slate: #55677a;        --slate-bg: rgba(100, 116, 139, 0.11);
+
+  /* Brillantes para rellenos sólidos (steppers, contadores) */
+  --ok-bright: #34AB1E;
+  --warn-bright: #E47113;
+  --gold-bright: #EDB02E;
+  --danger-bright: #A6141D;
+  --violet-bright: #6366f1;
+  --star: #eda50a;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0b0b0d;
+  --surface: #161618;
+  --raised: #1e1e20;
+  --hover: #262628;
+  --line: #3a3a3c;
+  --line-soft: #242426;
+  --line-strong: #48484a;
+
+  --ink: #f5f5f7;
+  --body-c: #d1d1d6;
+  --muted: #98989d;
+  --faint: #636366;
+
+  /* El acento se mantiene institucional como relleno; el hover aclara en lugar de oscurecer */
+  --accent: #005A7E;
+  --accent-strong: #0078a8;
+  --accent-mid: #339ac4;
+  --accent-soft: rgba(0, 120, 168, 0.18);
+  --on-accent: #ffffff;
+  --accent-ring: rgba(88, 192, 232, 0.28);
+  --accent-ring-strong: rgba(88, 192, 232, 0.45);
+
+  --info: #58c0e8;         --info-bg: rgba(0, 110, 158, 0.22);
+  --teal: #45cdb9;         --teal-bg: rgba(22, 149, 134, 0.16);
+  --ok: #74cc63;           --ok-bg: rgba(52, 171, 30, 0.14);   --ok-line: #3f6e35;
+  --warn: #f09a52;         --warn-bg: rgba(228, 113, 19, 0.14); --warn-line: #6e441f;
+  --gold: #ecc35c;         --gold-bg: rgba(237, 176, 46, 0.12); --gold-line: #6b5522;
+  --danger: #ff9098;       --danger-bg: rgba(166, 20, 29, 0.20); --danger-line: #6e272c;
+  --violet: #a3a6f0;       --violet-bg: rgba(99, 102, 241, 0.16);
+  --sky: #7cc8ef;          --sky-bg: rgba(2, 132, 199, 0.22);
+  --rose: #fb99a8;         --rose-bg: rgba(244, 63, 94, 0.16);
+  --slate: #97aab9;        --slate-bg: rgba(148, 163, 184, 0.13);
+
+  --star: #ffc233;
+}
+
+/* Exponer los tokens como utilidades de Tailwind (bg-surface, text-ink, border-line…) */
+@theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Roboto, Arial, sans-serif;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-hover: var(--hover);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-line-strong: var(--line-strong);
+
+  --color-ink: var(--ink);
+  --color-body: var(--body-c);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-mid: var(--accent-mid);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-teal: var(--teal);
+  --color-teal-bg: var(--teal-bg);
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --color-ok-bright: var(--ok-bright);
+  --color-ok-line: var(--ok-line);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-bright: var(--warn-bright);
+  --color-warn-line: var(--warn-line);
+  --color-gold: var(--gold);
+  --color-gold-bg: var(--gold-bg);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-line: var(--gold-line);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-bright: var(--danger-bright);
+  --color-danger-line: var(--danger-line);
+  --color-violet: var(--violet);
+  --color-violet-bg: var(--violet-bg);
+  --color-violet-bright: var(--violet-bright);
+  --color-slate-c: var(--slate);
+  --color-slate-bg: var(--slate-bg);
+
+  --color-star: var(--star);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Roboto, Arial, sans-serif;
+  color: var(--body-c);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--faint); }
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--accent-mid);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent-ring);
+}
+
+/* Transition helpers */
+.transition-base {
+  transition: all 0.15s ease;
+}
+
+/* Semáforo SLA: pulso de alerta para tickets vencidos */
+@keyframes slaPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.sla-pulse {
+  animation: slaPulse 1.5s ease-in-out infinite;
+}
+
+/* Rating: agradecimiento al cerrar el ticket */
+@keyframes ratingThanks {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rating-thanks {
+  animation: ratingThanks 0.6s ease-out both;
+}
+
+/* Transición de desaparición del ticket calificado (cierre) */
+@keyframes ticketLeave {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+.ticket-leaving {
+  animation: ticketLeave 0.4s ease-in both;
+}
+
+/* Editor de mensaje: placeholder para contentEditable y salto de línea */
+.message-editor {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.message-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--faint);
+  pointer-events: none;
+}
+.message-editor b {
+  font-weight: 700;
+}

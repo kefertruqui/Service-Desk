@@ -1,0 +1,179 @@
+// =============================================================
+// Mesa de Servicios OATI – Modelo de datos relacional (DBML)
+// =============================================================
+// Refleja el modelo TypeScript de src/types.ts y los datos de
+// src/data/mockData.ts. Visualizar/editar en https://dbdiagram.io
+// El DDL Oracle equivalente vive en
+// Documentación/03b-esquema-sql-oracle.md
+// =============================================================
+
+// ---------- Catálogos ----------
+
+Table usuarios {
+  id integer [pk, increment]
+  nombre varchar(200) [not null]
+  correo varchar(200) [unique, not null]
+  dependencia varchar(200)
+  cargo varchar(200)
+  sede varchar(200)
+  rol varchar(20) [not null] // user | admin | technician
+  avatar varchar(10) // iniciales del círculo (ej. 'KF')
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table tecnicos {
+  id integer [pk, increment]
+  nombre varchar(200) [unique, not null] // Carlos Gómez, Sandra Ríos, ...
+}
+
+Table categorias {
+  id integer [pk, increment]
+  nombre varchar(200) [unique, not null] // categoryTree en mockData.ts
+  orden integer [default: 0]
+}
+
+Table subcategorias {
+  id integer [pk, increment]
+  categoria_id integer [not null, ref: > categorias.id]
+  nombre varchar(200) [not null]
+  orden integer [default: 0]
+}
+
+// ---------- Tickets ----------
+
+Table tickets {
+  id integer [pk, increment]
+  numero varchar(20) [unique, not null] // 'TK-0847'
+  usuario_id integer [not null, ref: > usuarios.id] // solicitante
+  titulo varchar(500) [not null]
+  tipo varchar(20) [not null] // Incidente | Solicitud | Problema | Sin Clasificar
+  categoria_id integer [ref: > categorias.id]
+  subcategoria_id integer [ref: > subcategorias.id]
+  estado varchar(40) [not null] // 9 estados del ciclo de vida
+  prioridad varchar(20) [not null] // Crítica | Alta | Media | Baja | Sin asignar
+  calificacion integer [note: 'encuesta 1..5; NULL si aún no califica']
+  descripcion text
+  area_asignada varchar(200) [note: 'campo legacy: Ticket.assignedTo']
+  sla_horas numeric [default: 0] // según prioridad (SLA_HOURS_BY_PRIORITY)
+  sla_iniciado_en timestamp // Ticket.slaStartedAt
+  causa_raiz text // Ticket.rootCause (ITIL 4)
+  workaround text // Ticket.workaround (solución temporal, ITIL 4)
+  codigo_cierre varchar(40) // Ticket.closureCode: resuelto | resuelto_con_workaround | no_resuelto | duplicado | cancelado
+  correo_remision varchar(500) // Ticket.remittedEmail (remitir a otra dependencia)
+  ubicacion varchar(300)
+  telefono varchar(50)
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+  fecha_actualizacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table etapas_solucion_ticket { // Ticket.solutionStages (1:N con tickets)
+  id integer [pk, increment]
+  ticket_id integer [not null, ref: > tickets.id]
+  descripcion varchar(1000) [not null]
+  completado boolean [default: false] // SolutionStage.done
+  completado_en timestamp // SolutionStage.doneAt
+  orden integer [default: 0]
+}
+
+Table tickets_tecnicos { // rel N:M tickets <-> técnicos (Ticket.technician)
+  ticket_id integer [ref: > tickets.id]
+  tecnico_id integer [ref: > tecnicos.id]
+  indexes {
+    (ticket_id, tecnico_id) [pk]
+  }
+}
+
+Table comentarios_ticket {
+  id integer [pk, increment]
+  ticket_id integer [not null, ref: > tickets.id]
+  autor varchar(200)
+  rol varchar(100) // 'Técnico OATI', 'Mesa de Servicios', ...
+  contenido text [not null]
+  es_interna boolean [default: false] // TicketComment.isInternal
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table actividades_ticket {
+  id integer [pk, increment]
+  ticket_id integer [not null, ref: > tickets.id]
+  accion varchar(300) [not null]
+  autor varchar(200)
+  estado_desde varchar(40) // TicketActivity.from
+  estado_hasta varchar(40) // TicketActivity.to (estado nuevo o correo de remisión)
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table archivos_adjuntos {
+  id integer [pk, increment]
+  ticket_id integer [not null, ref: > tickets.id]
+  tipo varchar(20) [not null, default: 'solicitud'] // 'solicitud' | 'solucion' (evidencia)
+  nombre_archivo varchar(500) [not null] // hoy solo nombres; futuro: BLOB/URL
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+// ---------- Notificaciones ----------
+
+Table notificaciones {
+  id integer [pk, increment]
+  tipo varchar(20) [not null] // sla-warning | sla-expired | new-ticket | info
+  titulo varchar(300)
+  mensaje varchar(2000)
+  ticket_id integer [ref: > tickets.id] // opcional; abre el ticket al hacer clic
+  numero_ticket varchar(20) // denormalizado para mostrar en la lista
+  leida boolean [default: false]
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+// ---------- Base de conocimiento ----------
+
+Table articulos_conocimiento {
+  id integer [pk, increment]
+  titulo varchar(500) [not null]
+  categoria varchar(200)
+  vistas integer [default: 0]
+  utilidad integer [note: 'porcentaje 0..100 (helpful)']
+  resumen varchar(2000)
+  introduccion text // solo artículos con pasos
+  fecha_creacion timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table pasos_articulo {
+  id integer [pk, increment]
+  articulo_id integer [not null, ref: > articulos_conocimiento.id]
+  posicion integer [not null]
+  paso varchar(2000) [not null]
+}
+
+Table consejos_articulo {
+  id integer [pk, increment]
+  articulo_id integer [not null, ref: > articulos_conocimiento.id]
+  posicion integer [not null]
+  consejo varchar(2000) [not null]
+}
+
+Table etiquetas_articulo {
+  id integer [pk, increment]
+  articulo_id integer [not null, ref: > articulos_conocimiento.id]
+  etiqueta varchar(100) [not null] // tags
+}
+
+// ---------- Catálogos sin usar aún en la UI (ver 08-pendientes) ----------
+
+Table sistemas_institucionales {
+  id integer [pk, increment]
+  nombre varchar(300) [unique, not null] // 42 sistemas (mockData.institutionalSystems)
+}
+
+Table categorias_servicio {
+  id integer [pk, increment]
+  icono varchar(20)
+  nombre varchar(200) [not null] // mockData.serviceCategories
+  sla varchar(50)
+  color varchar(50)
+}
+
+Table servicios_categoria {
+  id integer [pk, increment]
+  categoria_servicio_id integer [not null, ref: > categorias_servicio.id]
+  nombre varchar(300) [not null] // services
+}
